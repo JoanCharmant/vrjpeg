@@ -1,0 +1,17 @@
+syntax: glob
+obj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+*.suo
+*.obj
+*.pdb
+*.user
+*.avi
+*.ncb
+*.bak
+*.opensdf
+*.sdf
+*.nupkg
+**/packages/*
+!**/packages/build/
