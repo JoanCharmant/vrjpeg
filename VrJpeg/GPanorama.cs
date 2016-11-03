@@ -31,6 +31,9 @@ namespace VrJpeg
   /// </summary>
   public class GPanorama
   {
+
+    // Ref: https://developers.google.com/vr/concepts/cardboard-camera-vr-photo-format
+
     public int PanoCroppedAreaLeftPixels { get; private set; }
     public int PanoCroppedAreaTopPixels { get; private set; }
     public int PanoCroppedAreaImageWidthPixels { get; private set; }
@@ -81,15 +84,24 @@ namespace VrJpeg
     {
       try
       {
-        ImageData = meta.GetPropertyBase64(nsImage, "GImage:Data");
+        ImageData = GetPropertyBase64(meta, nsImage, "GImage:Data");
 
         if (importAudio)
-          AudioData = meta.GetPropertyBase64(nsAudio, "GAudio:Data");
+          AudioData = GetPropertyBase64(meta, nsAudio, "GAudio:Data");
       }
       catch
       {
 
       }
+    }
+
+    private byte[] GetPropertyBase64(IXmpMeta meta, string schemaNs, string propName)
+    {
+      // Use System.Convert rather than IXmpMeta Base64 decoder.
+      // The base64 strings have the padding removed which causes an exception in the IXmpMeta decoder.
+      string base64 = meta.GetPropertyString(schemaNs, propName);
+      base64 = base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
+      return Convert.FromBase64String(base64);
     }
   }
 }
