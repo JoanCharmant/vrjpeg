@@ -18,9 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MetadataExtractor.Formats.Xmp;
 using XmpCore;
 
@@ -50,14 +47,14 @@ namespace VrJpeg
     private const string nsImage = "http://ns.google.com/photos/1.0/image/";
     private const string nsAudio = "http://ns.google.com/photos/1.0/audio/";
 
-    public GPanorama(List<XmpDirectory> directories, bool importAudio)
+    public GPanorama(List<XmpDirectory> directories)
     {
       // The first directory always contains the regular metadata and the second directory the extended data.
       if (directories == null || directories.Count != 2)
         return;
 
       ParseDirectory(directories[0].XmpMeta);
-      ParseExtendedDirectory(directories[1].XmpMeta, importAudio);
+      ParseExtendedDirectory(directories[1].XmpMeta);
     }
 
     private void ParseDirectory(IXmpMeta meta)
@@ -72,21 +69,24 @@ namespace VrJpeg
         PanoFullPanoHeightPixels = meta.GetPropertyInteger(nsPano, "GPano:FullPanoHeightPixels");
         PanoInitialViewHeadingDegrees = meta.GetPropertyInteger(nsPano, "GPano:InitialViewHeadingDegrees");
         ImageMime = meta.GetPropertyString(nsImage, "GImage:Mime");
-        AudioMime = meta.GetPropertyString(nsAudio, "GAudio:Mime");
+
+        if (meta.DoesPropertyExist(nsAudio, "GAudio:Mime"))
+          AudioMime = meta.GetPropertyString(nsAudio, "GAudio:Mime");
       }
       catch
       {
         // Silent catch. Not sure what to do.
       }
     }
-
-    private void ParseExtendedDirectory(IXmpMeta meta, bool importAudio)
+    
+    private void ParseExtendedDirectory(IXmpMeta meta)
     {
       try
       {
-        ImageData = GetPropertyBase64(meta, nsImage, "GImage:Data");
+        if (ImageMime != null && meta.DoesPropertyExist(nsImage, "GImage:Data"))
+          ImageData = GetPropertyBase64(meta, nsImage, "GImage:Data");
 
-        if (importAudio)
+        if (AudioMime != null && meta.DoesPropertyExist(nsAudio, "GAudio:Data"))
           AudioData = GetPropertyBase64(meta, nsAudio, "GAudio:Data");
       }
       catch

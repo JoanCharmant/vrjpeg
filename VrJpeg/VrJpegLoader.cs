@@ -41,7 +41,7 @@ namespace VrJpeg
       if (xmpDirectories == null || xmpDirectories.Count != 2)
         return left;
 
-      GPanorama pano = new GPanorama(xmpDirectories.ToList(), false);
+      GPanorama pano = new GPanorama(xmpDirectories.ToList());
       if (pano.ImageData == null)
         return left;
 
