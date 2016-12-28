@@ -16,33 +16,36 @@ namespace Sample
     public static void Main(string[] args)
     {
       // Sample code for the VrJpeg library.
-      // The first example extracts the right eye image and audio file to separate files.
-      // The second example creates a full equirectangular stereo panorama with eye images covering the correct long/lat.
+      // - The first example extracts the left eye and audio files to separate files.
+      // - The second example creates a full equirectangular stereo panorama with eye images covering the correct long/lat and poles filled.
 
       string filename = @"Resources\CardboardCamera1.vr.jpg";
       string filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
-      
-      //-----------------------
-      // Example 1.
-      //-----------------------
 
       // Read raw XMP metadata.
       var xmpDirectories = VrJpegMetadataReader.ReadMetadata(filename);
 
       // Parse metadata into a dedicated class.
       GPanorama pano = new GPanorama(xmpDirectories.ToList());
-      // Extract embedded data.
+
+      //-----------------------
+      // Example 1.
+      //-----------------------
+      
+      // Extract embedded image.
+      // The primary image is actually the right eye, the left eye is embedded in the metadata.
       if (pano.ImageData != null)
       {
-        string rightEyeFilename = string.Format("{0}-right.jpg", filenameWithoutExtension);
-        string rightEyeFile = Path.Combine(Path.GetDirectoryName(filename), rightEyeFilename);
+        string leftEyeFilename = string.Format("{0}_left.jpg", filenameWithoutExtension);
+        string leftEyeFile = Path.Combine(Path.GetDirectoryName(filename), leftEyeFilename);
 
-        File.WriteAllBytes(rightEyeFile, pano.ImageData);
+        File.WriteAllBytes(leftEyeFile, pano.ImageData);
       }
 
+      // Extract embedded audio.
       if (pano.AudioData != null)
       {
-        string audioFilename = string.Format("{0}-audio.mp4", filenameWithoutExtension);
+        string audioFilename = string.Format("{0}_audio.mp4", filenameWithoutExtension);
         string audioFile = Path.Combine(Path.GetDirectoryName(filename), audioFilename);
 
         File.WriteAllBytes(audioFile, pano.AudioData);
@@ -51,15 +54,20 @@ namespace Sample
       //-----------------------
       // Example 2.
       //-----------------------
-      
-      Bitmap stereoPano = VrJpegLoader.Load(filename, EyeImageGeometry.OverUnder);
+      Bitmap right = new Bitmap(filename);
+      Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
 
-      string stereoPanoFilename = string.Format("{0}-stereo.jpg", filenameWithoutExtension);
-      string stereoPanoFile = Path.Combine(Path.GetDirectoryName(filename), stereoPanoFilename);
+      int maxWidth = 8192;
+      Bitmap rightEquir = VrJpegHelper.CreateEquirectangularImage(right, pano, maxWidth, true);
+      Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano, maxWidth, true);
 
-      stereoPano.Save(stereoPanoFile);
+      Bitmap composite = VrJpegHelper.Compose(leftEquir, rightEquir, EyeImageGeometry.OverUnder);
+
+      string compositeFilename = string.Format("{0}_TB.jpg", filenameWithoutExtension);
+      string compositeFile = Path.Combine(Path.GetDirectoryName(filename), compositeFilename);
+      composite.Save(compositeFile);
     }
-
+    
     /// <summary>
     /// Helper function to log the raw XMP metadata values.
     /// </summary>

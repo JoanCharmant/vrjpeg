@@ -72,14 +72,21 @@ namespace VrJpeg
 
       int maxPreambleLength = Math.Max(XmpJpegPreamble.Length, XmpJpegExtendedPreamble.Length);
 
-      foreach (var segment in segments)
+      try
       {
-        string extractedPreamble = Encoding.UTF8.GetString(segment.Bytes, 0, maxPreambleLength);
+        foreach (var segment in segments)
+        {
+          string extractedPreamble = Encoding.UTF8.GetString(segment.Bytes, 0, maxPreambleLength);
         
-        if (extractedPreamble.StartsWith(XmpJpegPreamble))
-          ParseNormalXmpSegment(directories, segment.Bytes);
-        else if (extractedPreamble.StartsWith(XmpJpegExtendedPreamble))
-          ParseExtendedXmpSegment(ref extendedData, segment.Bytes);
+          if (extractedPreamble.StartsWith(XmpJpegPreamble))
+            ParseNormalXmpSegment(directories, segment.Bytes);
+          else if (extractedPreamble.StartsWith(XmpJpegExtendedPreamble))
+            ParseExtendedXmpSegment(ref extendedData, segment.Bytes);
+        }
+      }
+      catch (JpegProcessingException e)
+      {
+        return directories;
       }
       
       if (extendedData == null)
