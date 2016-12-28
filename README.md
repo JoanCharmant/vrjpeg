@@ -23,8 +23,9 @@ Create a full equirectangular stereo-panorama, with poles filled in:
     Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
 
     int maxWidth = 8192;
-    Bitmap rightEquir = VrJpegHelper.CreateEquirectangularImage(right, pano, maxWidth, true);
-    Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano, maxWidth, true);
+    bool fillPoles = true;
+    Bitmap rightEquir = VrJpegHelper.CreateEquirectangularImage(right, pano, maxWidth, fillPoles);
+    Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano, maxWidth, fillPoles);
     
     Bitmap stereoPano = VrJpegHelper.Compose(leftEquir, rightEquir, EyeImageGeometry.OverUnder);
     
