@@ -20,7 +20,7 @@ var xmpDirectories = VrJpegMetadataReader.ReadMetadata(input);
 GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
 Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
-Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano);
+Bitmap leftEquir = VrJpegHelper.Equirectangularize(left, pano);
 leftEquir.save("left-equir.jpg");
 ```
 
