@@ -1,33 +1,35 @@
 # VrJpeg #
 
-.NET Helper library for *.vr.jpg files created by the Google Cardboard Camera Android app.
+.NET Helper library for *.vr.jpg files. These files are produced by the Google Cardboard Camera Android app.
 
+Code samples:
 
-Extract left eye and audio to separate files:
+- High level abstraction: create a full equirectangular stereo-panorama with poles filled in.
 
 ```csharp
-    var xmpDirectories = VrJpegMetadataReader.ReadMetadata(input);
-    GPanorama pano = new GPanorama(xmpDirectories.ToList());
-
-    File.WriteAllBytes("left-eye.jpg", pano.ImageData);
-    File.WriteAllBytes("audio.mp4", pano.AudioData);
+bool fillPoles = true;
+int maxWidth = 8192;
+Bitmap stereoPano = VrJpegHelper.CreateStereoEquirectangular(input, EyeImageGeometry.OverUnder, fillPoles, maxWidth);
+stereoPano.save("stereopano.jpg");
 ```
 
-Create a full equirectangular stereo-panorama, with poles filled in:
-    
+- Mid level abstraction: extract the left-eye from the metadata, then convert it to an equirectangular image.
+
 ```csharp
-    var xmpDirectories = VrJpegMetadataReader.ReadMetadata(input);
-    GPanorama pano = new GPanorama(xmpDirectories.ToList());
+var xmpDirectories = VrJpegMetadataReader.ReadMetadata(input);
+GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
-    Bitmap right = new Bitmap(input);
-    Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
+Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
+Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano);
+leftEquir.save("left-equir.jpg");
+```
 
-    int maxWidth = 8192;
-    bool fillPoles = true;
-    Bitmap rightEquir = VrJpegHelper.CreateEquirectangularImage(right, pano, maxWidth, fillPoles);
-    Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano, maxWidth, fillPoles);
-    
-    Bitmap stereoPano = VrJpegHelper.Compose(leftEquir, rightEquir, EyeImageGeometry.OverUnder);
-    
-    stereoPano.Save("stereopano.jpg");
+- Low level abstraction: extract left-eye JPEG bytes and audio MP4 bytes directly from the metadata.
+
+```csharp
+var xmpDirectories = VrJpegMetadataReader.ReadMetadata(input);
+GPanorama pano = new GPanorama(xmpDirectories.ToList());
+
+File.WriteAllBytes("left-eye.jpg", pano.ImageData);
+File.WriteAllBytes("audio.mp4", pano.AudioData);
 ```

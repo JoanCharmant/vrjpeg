@@ -48,10 +48,11 @@ namespace VrJpeg
     }
     
     /// <summary>
-    /// Takes a single eye Bitmap and paints it at the correct latitude-longitude within a fully spherical equirectangular image.
+    /// Takes a single eye Bitmap and creates a fully spherical equirectangular image,
+    /// with the pano painted at the correct latitude-longitude. 
     /// Optionally fills in the poles.
     /// </summary>
-    public static Bitmap CreateEquirectangularImage(Bitmap bitmap, GPanorama pano, int maxWidth, bool fillPoles)
+    public static Bitmap Equirectangularize(Bitmap bitmap, GPanorama pano, bool fillPoles = true, int maxWidth = 0)
     {
       if (bitmap == null)
         return null;
@@ -85,7 +86,7 @@ namespace VrJpeg
     /// <summary>
     /// Combines two equirectangular images into a single stereo image, either left/right or top/bottom.
     /// </summary>
-    public static Bitmap Compose(Bitmap left, Bitmap right, EyeImageGeometry geometry)
+    public static Bitmap ComposeEyes(Bitmap left, Bitmap right, EyeImageGeometry geometry = EyeImageGeometry.OverUnder)
     {
       if (left == null || right == null || left.Size != right.Size || left.PixelFormat != right.PixelFormat)
         return null;
@@ -101,6 +102,36 @@ namespace VrJpeg
       }
       
       return result;
+    }
+
+    /// <summary>
+    /// Takes a .vr.jpg file, extracts the individual eye images and recombine them into a full omni-stereo image.
+    /// </summary>
+    public static Bitmap CreateStereoEquirectangular(string filename, EyeImageGeometry geometry = EyeImageGeometry.OverUnder, bool fillPoles = true, int maxWidth = 0)
+    {
+      var xmpDirectories = VrJpegMetadataReader.ReadMetadata(filename);
+      GPanorama pano = new GPanorama(xmpDirectories.ToList());
+
+      Bitmap right = new Bitmap(filename);
+      Bitmap left = ExtractLeftEye(pano);
+
+      if (left == null)
+      {
+        right.Dispose();
+        left.Dispose();
+        return null;
+      }
+
+      Bitmap rightEquir = Equirectangularize(right, pano, fillPoles, maxWidth);
+      Bitmap leftEquir = Equirectangularize(left, pano, fillPoles, maxWidth);
+      Bitmap composite = ComposeEyes(leftEquir, rightEquir, geometry);
+
+      right.Dispose();
+      left.Dispose();
+      rightEquir.Dispose();
+      leftEquir.Dispose();
+
+      return composite;
     }
   }
 }
