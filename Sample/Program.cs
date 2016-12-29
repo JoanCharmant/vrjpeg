@@ -31,25 +31,34 @@ namespace Sample
 {
   public class Program
   {
+    /// <summary>
+    /// Sample code for the VrJpeg library.
+    /// </summary>
+    /// <param name="args"></param>
     public static void Main(string[] args)
     {
-      // Sample code for the VrJpeg library.
-      // - The first example extracts the left eye and audio files to separate files.
-      // - The second example creates a full equirectangular stereo panorama with eye images covering the correct long/lat and poles filled.
-
       string filename = @"Resources\CardboardCamera1.vr.jpg";
-      string filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
+      
+      // The examples are sorted from lower abstraction level to higher abstraction level.
+      Example1(filename);
+      Example2(filename);
+      Example3(filename);
+    }
 
+    /// <summary>
+    /// Extracts the left eye and audio files to separate files.
+    /// This example directly manipulates the embedded content as bytes.
+    /// </summary>
+    private static void Example1(string filename)
+    {
+      string filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
+    
       // Read raw XMP metadata.
       var xmpDirectories = VrJpegMetadataReader.ReadMetadata(filename);
 
       // Parse metadata into a dedicated class.
       GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
-      //-----------------------
-      // Example 1.
-      //-----------------------
-      
       // Extract embedded image.
       // The primary image is actually the right eye, the left eye is embedded in the metadata.
       if (pano.ImageData != null)
@@ -68,20 +77,47 @@ namespace Sample
 
         File.WriteAllBytes(audioFile, pano.AudioData);
       }
+    }
+     
+    /// <summary>
+    /// Extract the left eye panorama and creates a full equirectangular image from it.
+    /// The resulting image is suitable for viewing in a spherical viewer.
+    /// </summary>
+    private static void Example2(string filename)
+    {
+      // Read raw XMP metadata.
+      var xmpDirectories = VrJpegMetadataReader.ReadMetadata(filename);
 
-      //-----------------------
-      // Example 2.
-      //-----------------------
-      Bitmap right = new Bitmap(filename);
+      // Parse metadata into a dedicated class.
+      GPanorama pano = new GPanorama(xmpDirectories.ToList());
+
+      // Extract left eye to a Bitmap.
       Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
 
+      // Generate an equirectangular image.
       int maxWidth = 8192;
-      Bitmap rightEquir = VrJpegHelper.CreateEquirectangularImage(right, pano, maxWidth, true);
-      Bitmap leftEquir = VrJpegHelper.CreateEquirectangularImage(left, pano, maxWidth, true);
+      bool fillPoles = true;
+      Bitmap leftEquir = VrJpegHelper.Equirectangularize(left, pano, fillPoles, maxWidth);
 
-      Bitmap composite = VrJpegHelper.Compose(leftEquir, rightEquir, EyeImageGeometry.OverUnder);
+      // Save the result.
+      string leftEquirFilename = string.Format("{0}_left_equir.jpg", Path.GetFileNameWithoutExtension(filename));
+      string leftEquirFile = Path.Combine(Path.GetDirectoryName(filename), leftEquirFilename);
+      leftEquir.Save(leftEquirFile);
+    }
 
-      string compositeFilename = string.Format("{0}_TB.jpg", filenameWithoutExtension);
+    /// <summary>
+    /// Extract both eyes and creates a stereo equirectangular image.
+    /// The resulting image is suitable for viewing in viewers supporting omni-stereo content.
+    /// </summary>
+    private static void Example3(string filename)
+    {
+      // Extract both eyes and create an equirectangular stereo image.
+      int maxWidth = 8192;
+      bool fillPoles = true;
+      Bitmap composite = VrJpegHelper.CreateStereoEquirectangular(filename, EyeImageGeometry.OverUnder, fillPoles, maxWidth);
+
+      // Save the result.
+      string compositeFilename = string.Format("{0}_TB.jpg", Path.GetFileNameWithoutExtension(filename));
       string compositeFile = Path.Combine(Path.GetDirectoryName(filename), compositeFilename);
       composite.Save(compositeFile);
     }
