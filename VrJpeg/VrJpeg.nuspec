@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>VrJpeg</id>
+    <version>1.2.1</version>
+    <title>VrJpeg</title>
+    <authors>Joan Charmant</authors>
+    <owners>jcharmant</owners>
+    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <projectUrl>https://github.com/JoanCharmant/vrjpeg</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>.NET Helper library for *.vr.jpg files. These files are produced by the Google Cardboard Camera Android app.</description>
+    <copyright>Copyright Joan Charmant 2015-2016</copyright>
+    <tags>cardboardcamera cardboard vrjpg .vr.jpg metadata stereoscopy panorama</tags>
+    <dependencies>
+      <dependency id="MetadataExtractor" version="1.5.3" />	
+      <dependency id="XmpCore" version="1.2.2" />
+      <dependency id="SharpZipLib" version="0.86.0" />
+    </dependencies>
+  </metadata>
+</package>
