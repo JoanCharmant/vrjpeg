@@ -84,7 +84,7 @@ namespace VrJpeg
             ParseExtendedXmpSegment(ref extendedData, segment.Bytes);
         }
       }
-      catch (JpegProcessingException e)
+      catch (JpegProcessingException)
       {
         return directories;
       }
