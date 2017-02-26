@@ -63,7 +63,7 @@ namespace Sample
       // The primary image is the left eye, the right eye is embedded in the metadata.
       if (pano.ImageData != null)
       {
-        string rightEyeFilename = string.Format("{0}_right.png", filenameWithoutExtension);
+        string rightEyeFilename = string.Format("{0}_right.jpg", filenameWithoutExtension);
         string rightEyeFile = Path.Combine(Path.GetDirectoryName(filename), rightEyeFilename);
 
         File.WriteAllBytes(rightEyeFile, pano.ImageData);
