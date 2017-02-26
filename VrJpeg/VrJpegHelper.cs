@@ -67,9 +67,10 @@ namespace VrJpeg
         float ratio = (float)maxWidth / imgWidth;
 
         imgWidth = maxWidth;
-        imgHeight = (int)(imgHeight * ratio);
+        imgHeight = imgWidth / 2;
 
-        crop = new Rectangle((int)(crop.Left * ratio), (int)(crop.Top * ratio), (int)(crop.Width * ratio), (int)(crop.Height * ratio));
+        // In case of subpixel coordinate, expand the rectangle.
+        crop = new Rectangle((int)Math.Floor(crop.Left * ratio), (int)Math.Floor(crop.Top * ratio), (int)Math.Ceiling(crop.Width * ratio), (int)Math.Ceiling(crop.Height * ratio));
       }
 
       Bitmap result = new Bitmap(imgWidth, imgHeight, bitmap.PixelFormat);
