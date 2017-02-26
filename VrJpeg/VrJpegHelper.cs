@@ -33,9 +33,9 @@ namespace VrJpeg
   {
     /// <summary>
     /// Extracts the embedded image from the panorama and returns it as a Bitmap.
-    /// Note: the right eye can be extracted simply by loading the original file into a regular Bitmap.
+    /// Note: the left eye can be extracted simply by loading the original file into a regular Bitmap.
     /// </summary>
-    public static Bitmap ExtractLeftEye(GPanorama pano)
+    public static Bitmap ExtractRightEye(GPanorama pano)
     {
       if (pano.ImageData == null)
         return null;
@@ -113,24 +113,24 @@ namespace VrJpeg
       var xmpDirectories = VrJpegMetadataReader.ReadMetadata(filename);
       GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
-      Bitmap right = new Bitmap(filename);
-      Bitmap left = ExtractLeftEye(pano);
+      Bitmap left = new Bitmap(filename);
+      Bitmap right = ExtractRightEye(pano);
 
-      if (left == null)
+      if (right == null)
       {
-        right.Dispose();
         left.Dispose();
+        right.Dispose();
         return null;
       }
 
-      Bitmap rightEquir = Equirectangularize(right, pano, fillPoles, maxWidth);
       Bitmap leftEquir = Equirectangularize(left, pano, fillPoles, maxWidth);
+      Bitmap rightEquir = Equirectangularize(right, pano, fillPoles, maxWidth);
       Bitmap composite = ComposeEyes(leftEquir, rightEquir, geometry);
 
-      right.Dispose();
       left.Dispose();
-      rightEquir.Dispose();
+      right.Dispose();
       leftEquir.Dispose();
+      rightEquir.Dispose();
 
       return composite;
     }

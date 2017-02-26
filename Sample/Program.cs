@@ -46,7 +46,7 @@ namespace Sample
     }
 
     /// <summary>
-    /// Extracts the left eye and audio files to separate files.
+    /// Extracts the right eye and audio files to separate files.
     /// This example directly manipulates the embedded content as bytes.
     /// </summary>
     private static void Example1(string filename)
@@ -60,13 +60,13 @@ namespace Sample
       GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
       // Extract embedded image.
-      // The primary image is actually the right eye, the left eye is embedded in the metadata.
+      // The primary image is the left eye, the right eye is embedded in the metadata.
       if (pano.ImageData != null)
       {
-        string leftEyeFilename = string.Format("{0}_left.jpg", filenameWithoutExtension);
-        string leftEyeFile = Path.Combine(Path.GetDirectoryName(filename), leftEyeFilename);
+        string rightEyeFilename = string.Format("{0}_right.png", filenameWithoutExtension);
+        string rightEyeFile = Path.Combine(Path.GetDirectoryName(filename), rightEyeFilename);
 
-        File.WriteAllBytes(leftEyeFile, pano.ImageData);
+        File.WriteAllBytes(rightEyeFile, pano.ImageData);
       }
 
       // Extract embedded audio.
@@ -80,7 +80,7 @@ namespace Sample
     }
      
     /// <summary>
-    /// Extract the left eye panorama and creates a full equirectangular image from it.
+    /// Extract the right eye panorama and creates a full equirectangular image from it.
     /// The resulting image is suitable for viewing in a spherical viewer.
     /// </summary>
     private static void Example2(string filename)
@@ -91,18 +91,18 @@ namespace Sample
       // Parse metadata into a dedicated class.
       GPanorama pano = new GPanorama(xmpDirectories.ToList());
 
-      // Extract left eye to a Bitmap.
-      Bitmap left = VrJpegHelper.ExtractLeftEye(pano);
-
+      // Extract right eye to a Bitmap.
+      Bitmap right = VrJpegHelper.ExtractRightEye(pano);
+      
       // Generate an equirectangular image.
       int maxWidth = 8192;
       bool fillPoles = true;
-      Bitmap leftEquir = VrJpegHelper.Equirectangularize(left, pano, fillPoles, maxWidth);
+      Bitmap rightEquir = VrJpegHelper.Equirectangularize(right, pano, fillPoles, maxWidth);
 
       // Save the result.
-      string leftEquirFilename = string.Format("{0}_left_equir.jpg", Path.GetFileNameWithoutExtension(filename));
-      string leftEquirFile = Path.Combine(Path.GetDirectoryName(filename), leftEquirFilename);
-      leftEquir.Save(leftEquirFile);
+      string rightEquirFilename = string.Format("{0}_right_equir.png", Path.GetFileNameWithoutExtension(filename));
+      string rightEquirFile = Path.Combine(Path.GetDirectoryName(filename), rightEquirFilename);
+      rightEquir.Save(rightEquirFile);
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ namespace Sample
       Bitmap composite = VrJpegHelper.CreateStereoEquirectangular(filename, EyeImageGeometry.OverUnder, fillPoles, maxWidth);
 
       // Save the result.
-      string compositeFilename = string.Format("{0}_TB.jpg", Path.GetFileNameWithoutExtension(filename));
+      string compositeFilename = string.Format("{0}_TB.png", Path.GetFileNameWithoutExtension(filename));
       string compositeFile = Path.Combine(Path.GetDirectoryName(filename), compositeFilename);
       composite.Save(compositeFile);
     }
