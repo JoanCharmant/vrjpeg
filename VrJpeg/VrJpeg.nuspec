@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>VrJpeg</id>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <title>VrJpeg</title>
     <authors>Joan Charmant</authors>
     <owners>jcharmant</owners>
@@ -10,7 +10,8 @@
     <projectUrl>https://github.com/JoanCharmant/vrjpeg</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET Helper library for *.vr.jpg files. These files are produced by the Google Cardboard Camera Android app.</description>
-    <copyright>Copyright Joan Charmant 2015-2016</copyright>
+    <releaseNotes>Fixed the wrong assumption that the right eye was the primary jpeg and the left eye the one in the metadata.</releaseNotes>
+    <copyright>Copyright Joan Charmant 2015-2017</copyright>
     <tags>cardboardcamera cardboard vrjpg .vr.jpg metadata stereoscopy panorama</tags>
     <dependencies>
       <dependency id="MetadataExtractor" version="1.5.3" />	
